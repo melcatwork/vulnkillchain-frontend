@@ -325,9 +325,76 @@ function App() {
                     )}
 
                     {/* Description */}
-                    <p style={{ color: '#aaa', marginBottom: '15px', fontSize: '0.85rem', lineHeight: '1.5' }}>
+                    <p style={{ color: '#aaa', marginBottom: '20px', fontSize: '0.85rem', lineHeight: '1.5' }}>
                       {attackData.description}
                     </p>
+
+                    {/* Kill Chain Section */}
+                    <div style={{ borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '15px', marginBottom: '20px' }}>
+                      <h3 style={{ marginBottom: '10px', color: '#7c3aed', fontSize: '0.95rem' }}>🎯 Kill Chain</h3>
+                      
+                      {/* Techniques */}
+                      {attackData.kill_chain?.length > 0 && (
+                        <div style={{ marginBottom: '15px' }}>
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                            {attackData.kill_chain.map((item, idx) => (
+                              <div
+                                key={idx}
+                                style={{
+                                  background: 'linear-gradient(135deg, #7c3aed22, #00d4ff22)',
+                                  padding: '8px 12px',
+                                  borderRadius: '6px',
+                                  border: '1px solid #7c3aed',
+                                  fontSize: '0.8rem'
+                                }}
+                              >
+                                <span style={{ color: '#00d4ff', fontWeight: 'bold' }}>
+                                  Phase {item.phase}
+                                </span>
+                                <span style={{ margin: '0 6px', color: '#666' }}>→</span>
+                                <span style={{ color: '#fff' }}>{item.tactic_name}</span>
+                                <span style={{ margin: '0 6px', color: '#666' }}>→</span>
+                                <span style={{ color: '#7c3aed', fontFamily: 'monospace' }}>{item.technique_id}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Mermaid Visualization */}
+                      <div>
+                        <h4 style={{ marginBottom: '10px', color: '#7c3aed', fontSize: '0.9rem' }}>📊 Visualization</h4>
+                        <div 
+                          ref={mermaidRef}
+                          style={{ 
+                            background: 'rgba(0,0,0,0.3)', 
+                            padding: '12px', 
+                            borderRadius: '8px',
+                            minHeight: '180px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                          }}
+                        />
+                        
+                        {/* Mermaid Code */}
+                        <details style={{ marginTop: '12px' }}>
+                          <summary style={{ cursor: 'pointer', color: '#666', fontSize: '0.8rem' }}>
+                            View Mermaid Code
+                          </summary>
+                          <pre style={{ 
+                            background: 'rgba(0,0,0,0.5)', 
+                            padding: '10px', 
+                            borderRadius: '6px',
+                            overflow: 'auto',
+                            marginTop: '6px',
+                            fontSize: '0.7rem'
+                          }}>
+                            {attackData.mermaid}
+                          </pre>
+                        </details>
+                      </div>
+                    </div>
 
                     {/* Patches */}
                     {attackData.patches?.length > 0 && (
@@ -448,73 +515,6 @@ function App() {
                         </div>
                       </div>
                     )}
-
-                    {/* Kill Chain Header */}
-                    <div style={{ borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '15px', marginTop: '10px' }}>
-                      <h3 style={{ marginBottom: '10px', color: '#7c3aed', fontSize: '0.95rem' }}>🎯 Kill Chain</h3>
-                      
-                      {/* Techniques */}
-                      {attackData.kill_chain?.length > 0 && (
-                        <div style={{ marginBottom: '15px' }}>
-                          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                            {attackData.kill_chain.map((item, idx) => (
-                              <div
-                                key={idx}
-                                style={{
-                                  background: 'linear-gradient(135deg, #7c3aed22, #00d4ff22)',
-                                  padding: '8px 12px',
-                                  borderRadius: '6px',
-                                  border: '1px solid #7c3aed',
-                                  fontSize: '0.8rem'
-                                }}
-                              >
-                                <span style={{ color: '#00d4ff', fontWeight: 'bold' }}>
-                                  Phase {item.phase}
-                                </span>
-                                <span style={{ margin: '0 6px', color: '#666' }}>→</span>
-                                <span style={{ color: '#fff' }}>{item.tactic_name}</span>
-                                <span style={{ margin: '0 6px', color: '#666' }}>→</span>
-                                <span style={{ color: '#7c3aed', fontFamily: 'monospace' }}>{item.technique_id}</span>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Mermaid Visualization */}
-                      <div>
-                        <h4 style={{ marginBottom: '10px', color: '#7c3aed', fontSize: '0.9rem' }}>📊 Visualization</h4>
-                        <div 
-                          ref={mermaidRef}
-                          style={{ 
-                            background: 'rgba(0,0,0,0.3)', 
-                            padding: '12px', 
-                            borderRadius: '8px',
-                            minHeight: '180px',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center'
-                          }}
-                        />
-                        
-                        {/* Mermaid Code */}
-                        <details style={{ marginTop: '12px' }}>
-                          <summary style={{ cursor: 'pointer', color: '#666', fontSize: '0.8rem' }}>
-                            View Mermaid Code
-                          </summary>
-                          <pre style={{ 
-                            background: 'rgba(0,0,0,0.5)', 
-                            padding: '10px', 
-                            borderRadius: '6px',
-                            overflow: 'auto',
-                            marginTop: '6px',
-                            fontSize: '0.7rem'
-                          }}>
-                            {attackData.mermaid}
-                          </pre>
-                        </details>
-                      </div>
-                    </div>
                   </div>
                 ) : (
                   <div style={{ 
