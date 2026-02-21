@@ -1,0 +1,4 @@
+# https://zeabur.com/docs/deploy/config
+build:
+  command: npm install && npm run build
+  dockerfilePath: Dockerfile
