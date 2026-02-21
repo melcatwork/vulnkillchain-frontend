@@ -12,13 +12,14 @@ const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000'
 
 function App() {
   const [searchTerm, setSearchTerm] = useState('')
-  const [searchType, setSearchType] = useState('product') // product or cve
+  const [searchType, setSearchType] = useState('product')
   const [results, setResults] = useState(null)
+  const [sortedCves, setSortedCves] = useState([])
   const [selectedCve, setSelectedCve] = useState(null)
   const [attackData, setAttackData] = useState(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
-  const [activeTab, setActiveTab] = useState('search') // search, cisa-kev
+  const [activeTab, setActiveTab] = useState('search')
   const mermaidRef = useRef(null)
 
   useEffect(() => {
@@ -43,6 +44,7 @@ function App() {
     setLoading(true)
     setError(null)
     setResults(null)
+    setSortedCves([])
     setSelectedCve(null)
     setAttackData(null)
     
@@ -59,6 +61,15 @@ function App() {
       
       const data = await response.json()
       setResults(data)
+      
+      // Sort CVEs by severity (highest first)
+      const cves = data.cves || [data]
+      const sorted = [...cves].sort((a, b) => {
+        const scoreA = parseFloat(a.cvss_score) || 0
+        const scoreB = parseFloat(b.cvss_score) || 0
+        return scoreB - scoreA
+      })
+      setSortedCves(sorted)
     } catch (err) {
       setError(err.message)
     } finally {
@@ -94,40 +105,40 @@ function App() {
   }
 
   return (
-    <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '20px' }}>
+    <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '20px' }}>
       {/* Header */}
       <header style={{ 
         textAlign: 'center', 
-        marginBottom: '40px',
-        padding: '40px 0',
+        marginBottom: '30px',
+        padding: '30px 0',
         borderBottom: '1px solid rgba(255,255,255,0.1)'
       }}>
         <h1 style={{ 
-          fontSize: '3rem', 
+          fontSize: '2.5rem', 
           background: 'linear-gradient(90deg, #00d4ff, #7c3aed)',
           WebkitBackgroundClip: 'text',
           WebkitTextFillColor: 'transparent',
-          marginBottom: '10px'
+          marginBottom: '8px'
         }}>
           ⚔️ VulnKillChain
         </h1>
-        <p style={{ color: '#888', fontSize: '1.1rem' }}>
+        <p style={{ color: '#888', fontSize: '1rem' }}>
           CVE Vulnerability Intelligence → MITRE ATT&CK Kill Chain
         </p>
       </header>
 
       {/* Tabs */}
-      <div style={{ display: 'flex', gap: '10px', marginBottom: '30px' }}>
+      <div style={{ display: 'flex', gap: '10px', marginBottom: '25px' }}>
         <button
           onClick={() => setActiveTab('search')}
           style={{
-            padding: '12px 24px',
+            padding: '10px 20px',
             background: activeTab === 'search' ? 'linear-gradient(90deg, #00d4ff, #7c3aed)' : 'rgba(255,255,255,0.05)',
             border: 'none',
             borderRadius: '8px',
             color: '#fff',
             cursor: 'pointer',
-            fontSize: '1rem',
+            fontSize: '0.95rem',
             fontWeight: '600'
           }}
         >
@@ -136,13 +147,13 @@ function App() {
         <button
           onClick={() => setActiveTab('cisa-kev')}
           style={{
-            padding: '12px 24px',
+            padding: '10px 20px',
             background: activeTab === 'cisa-kev' ? 'linear-gradient(90deg, #00d4ff, #7c3aed)' : 'rgba(255,255,255,0.05)',
             border: 'none',
             borderRadius: '8px',
             color: '#fff',
             cursor: 'pointer',
-            fontSize: '1rem',
+            fontSize: '0.95rem',
             fontWeight: '600'
           }}
         >
@@ -155,9 +166,9 @@ function App() {
           {/* Search Box */}
           <div style={{ 
             background: 'rgba(255,255,255,0.05)', 
-            padding: '30px', 
+            padding: '25px', 
             borderRadius: '16px',
-            marginBottom: '30px'
+            marginBottom: '25px'
           }}>
             <div style={{ display: 'flex', gap: '10px', marginBottom: '15px' }}>
               <button
@@ -197,8 +208,8 @@ function App() {
                 placeholder={searchType === 'product' ? 'e.g., log4j, exchange, cisco ios' : 'e.g., CVE-2021-44228'}
                 style={{
                   flex: 1,
-                  padding: '16px 20px',
-                  fontSize: '1.1rem',
+                  padding: '14px 18px',
+                  fontSize: '1rem',
                   background: 'rgba(0,0,0,0.3)',
                   border: '1px solid #333',
                   borderRadius: '10px',
@@ -210,8 +221,8 @@ function App() {
                 onClick={searchCves}
                 disabled={loading}
                 style={{
-                  padding: '16px 32px',
-                  fontSize: '1.1rem',
+                  padding: '14px 28px',
+                  fontSize: '1rem',
                   background: 'linear-gradient(90deg, #00d4ff, #7c3aed)',
                   border: 'none',
                   borderRadius: '10px',
@@ -231,142 +242,154 @@ function App() {
             <div style={{ 
               background: 'rgba(255,107,107,0.1)', 
               border: '1px solid #ff6b6b',
-              padding: '20px', 
+              padding: '18px', 
               borderRadius: '12px',
-              marginBottom: '30px',
+              marginBottom: '25px',
               color: '#ff6b6b'
             }}>
               ⚠️ Error: {error}
             </div>
           )}
 
-          {/* Results */}
+          {/* Main Content - Two Column Layout */}
           {results && (
-            <div style={{ marginBottom: '40px' }}>
-              <h2 style={{ marginBottom: '20px', color: '#00d4ff' }}>
-                {results.count || 1} Result{results.count !== 1 ? 's' : ''}
-                {results.product && ` for "${results.product}"`}
-              </h2>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '25px' }}>
               
-              {/* CVE List or Single CVE */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-                {(results.cves || [results]).map((cve, idx) => (
-                  <div
-                    key={cve.id || idx}
-                    onClick={() => cve.id && getAttackMapping(cve.id)}
-                    style={{
-                      background: 'rgba(255,255,255,0.05)',
-                      padding: '20px',
-                      borderRadius: '12px',
-                      cursor: cve.id ? 'pointer' : 'default',
-                      transition: 'all 0.2s',
-                      border: selectedCve === cve.id ? '1px solid #00d4ff' : '1px solid transparent'
-                    }}
-                  >
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-                      <h3 style={{ color: '#00d4ff', fontSize: '1.3rem' }}>{cve.id}</h3>
-                      {cve.cvss_score && (
-                        <span style={{
-                          padding: '4px 12px',
-                          borderRadius: '20px',
-                          background: cve.cvss_score >= 9 ? '#ff4757' : cve.cvss_score >= 7 ? '#ffa502' : '#2ed573',
-                          fontSize: '0.9rem',
-                          fontWeight: 'bold'
-                        }}>
-                          {cve.cvss_score}
-                        </span>
-                      )}
-                    </div>
-                    <p style={{ color: '#aaa', lineHeight: '1.6' }}>
-                      {cve.description?.substring(0, 300)}...
-                    </p>
-                    {cve.id && (
-                      <p style={{ color: '#666', fontSize: '0.9rem', marginTop: '10px' }}>
-                        Click to view ATT&CK kill chain →
-                      </p>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Attack Mapping & Kill Chain */}
-          {attackData && (
-            <div style={{ marginTop: '40px' }}>
-              <div style={{ 
-                background: 'rgba(255,255,255,0.05)', 
-                padding: '30px', 
-                borderRadius: '16px' 
-              }}>
-                <h2 style={{ color: '#00d4ff', marginBottom: '10px' }}>
-                  🎯 Kill Chain: {attackData.cve_id}
+              {/* Left Column - Results List */}
+              <div>
+                <h2 style={{ marginBottom: '15px', color: '#00d4ff', fontSize: '1.3rem' }}>
+                  {sortedCves.length} Result{sortedCves.length !== 1 ? 's' : ''}
+                  {results.product && ` for "${results.product}"`}
                 </h2>
-                <p style={{ color: '#888', marginBottom: '30px', lineHeight: '1.6' }}>
-                  {attackData.description?.substring(0, 500)}
-                </p>
-
-                {/* Techniques */}
-                {attackData.kill_chain?.length > 0 && (
-                  <div style={{ marginBottom: '30px' }}>
-                    <h3 style={{ marginBottom: '15px', color: '#7c3aed' }}>ATT&CK Tactics & Techniques</h3>
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
-                      {attackData.kill_chain.map((item, idx) => (
-                        <div
-                          key={idx}
-                          style={{
-                            background: 'linear-gradient(135deg, #7c3aed22, #00d4ff22)',
-                            padding: '12px 20px',
-                            borderRadius: '8px',
-                            border: '1px solid #7c3aed'
-                          }}
-                        >
-                          <span style={{ color: '#00d4ff', fontWeight: 'bold' }}>
-                            Phase {item.phase}
+                
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', maxHeight: '70vh', overflowY: 'auto' }}>
+                  {sortedCves.map((cve, idx) => (
+                    <div
+                      key={cve.id || idx}
+                      onClick={() => cve.id && getAttackMapping(cve.id)}
+                      style={{
+                        background: 'rgba(255,255,255,0.05)',
+                        padding: '16px',
+                        borderRadius: '10px',
+                        cursor: cve.id ? 'pointer' : 'default',
+                        transition: 'all 0.2s',
+                        border: selectedCve === cve.id ? '1px solid #00d4ff' : '1px solid transparent'
+                      }}
+                    >
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                        <h3 style={{ color: '#00d4ff', fontSize: '1.1rem' }}>{cve.id}</h3>
+                        {cve.cvss_score && (
+                          <span style={{
+                            padding: '3px 10px',
+                            borderRadius: '15px',
+                            background: cve.cvss_score >= 9 ? '#ff4757' : cve.cvss_score >= 7 ? '#ffa502' : '#2ed573',
+                            fontSize: '0.8rem',
+                            fontWeight: 'bold'
+                          }}>
+                            {cve.cvss_score}
                           </span>
-                          <span style={{ margin: '0 10px', color: '#666' }}>→</span>
-                          <span style={{ color: '#fff' }}>{item.tactic_name}</span>
-                          <span style={{ margin: '0 10px', color: '#666' }}>→</span>
-                          <span style={{ color: '#7c3aed', fontFamily: 'monospace' }}>{item.technique_id}</span>
-                        </div>
-                      ))}
+                        )}
+                      </div>
+                      <p style={{ color: '#aaa', fontSize: '0.9rem', lineHeight: '1.5' }}>
+                        {cve.description?.substring(0, 150)}...
+                      </p>
                     </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Right Column - Kill Chain & Visualization */}
+              <div>
+                {attackData ? (
+                  <div style={{ 
+                    background: 'rgba(255,255,255,0.05)', 
+                    padding: '25px', 
+                    borderRadius: '16px',
+                    position: 'sticky',
+                    top: '20px'
+                  }}>
+                    <h2 style={{ color: '#00d4ff', marginBottom: '10px', fontSize: '1.3rem' }}>
+                      🎯 Kill Chain: {attackData.cve_id}
+                    </h2>
+                    <p style={{ color: '#888', marginBottom: '20px', fontSize: '0.9rem', lineHeight: '1.5' }}>
+                      {attackData.description?.substring(0, 300)}
+                    </p>
+
+                    {/* Techniques */}
+                    {attackData.kill_chain?.length > 0 && (
+                      <div style={{ marginBottom: '20px' }}>
+                        <h3 style={{ marginBottom: '12px', color: '#7c3aed', fontSize: '1rem' }}>ATT&CK Tactics & Techniques</h3>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                          {attackData.kill_chain.map((item, idx) => (
+                            <div
+                              key={idx}
+                              style={{
+                                background: 'linear-gradient(135deg, #7c3aed22, #00d4ff22)',
+                                padding: '10px 14px',
+                                borderRadius: '6px',
+                                border: '1px solid #7c3aed',
+                                fontSize: '0.85rem'
+                              }}
+                            >
+                              <span style={{ color: '#00d4ff', fontWeight: 'bold' }}>
+                                Phase {item.phase}
+                              </span>
+                              <span style={{ margin: '0 8px', color: '#666' }}>→</span>
+                              <span style={{ color: '#fff' }}>{item.tactic_name}</span>
+                              <span style={{ margin: '0 8px', color: '#666' }}>→</span>
+                              <span style={{ color: '#7c3aed', fontFamily: 'monospace' }}>{item.technique_id}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Mermaid Visualization */}
+                    <div style={{ marginTop: '20px' }}>
+                      <h3 style={{ marginBottom: '12px', color: '#7c3aed', fontSize: '1rem' }}>📊 Kill Chain Visualization</h3>
+                      <div 
+                        ref={mermaidRef}
+                        style={{ 
+                          background: 'rgba(0,0,0,0.3)', 
+                          padding: '15px', 
+                          borderRadius: '10px',
+                          minHeight: '250px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center'
+                        }}
+                      />
+                      
+                      {/* Mermaid Code */}
+                      <details style={{ marginTop: '15px' }}>
+                        <summary style={{ cursor: 'pointer', color: '#666', fontSize: '0.85rem' }}>
+                          View Mermaid Code
+                        </summary>
+                        <pre style={{ 
+                          background: 'rgba(0,0,0,0.5)', 
+                          padding: '12px', 
+                          borderRadius: '8px',
+                          overflow: 'auto',
+                          marginTop: '8px',
+                          fontSize: '0.75rem'
+                        }}>
+                          {attackData.mermaid}
+                        </pre>
+                      </details>
+                    </div>
+                  </div>
+                ) : (
+                  <div style={{ 
+                    background: 'rgba(255,255,255,0.05)', 
+                    padding: '40px', 
+                    borderRadius: '16px',
+                    textAlign: 'center',
+                    color: '#666'
+                  }}>
+                    <p style={{ fontSize: '1.1rem', marginBottom: '10px' }}>👈 Select a CVE</p>
+                    <p style={{ fontSize: '0.9rem' }}>Click on a vulnerability to see its kill chain and visualization</p>
                   </div>
                 )}
-
-                {/* Mermaid Kill Chain */}
-                <div style={{ marginTop: '30px' }}>
-                  <h3 style={{ marginBottom: '15px', color: '#7c3aed' }}>📊 Kill Chain Visualization</h3>
-                  <div 
-                    ref={mermaidRef}
-                    style={{ 
-                      background: 'rgba(0,0,0,0.3)', 
-                      padding: '20px', 
-                      borderRadius: '12px',
-                      minHeight: '300px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center'
-                    }}
-                  />
-                  
-                  {/* Mermaid Code for mermaid.live */}
-                  <details style={{ marginTop: '20px' }}>
-                    <summary style={{ cursor: 'pointer', color: '#666' }}>
-                      View Mermaid Code
-                    </summary>
-                    <pre style={{ 
-                      background: 'rgba(0,0,0,0.5)', 
-                      padding: '15px', 
-                      borderRadius: '8px',
-                      overflow: 'auto',
-                      marginTop: '10px',
-                      fontSize: '0.85rem'
-                    }}>
-                      {attackData.mermaid}
-                    </pre>
-                  </details>
-                </div>
               </div>
             </div>
           )}
@@ -380,22 +403,12 @@ function App() {
       {/* Footer */}
       <footer style={{ 
         textAlign: 'center', 
-        marginTop: '60px', 
+        marginTop: '40px', 
         padding: '20px',
         color: '#666',
         borderTop: '1px solid rgba(255,255,255,0.1)'
       }}>
-        <p>Data sources: NVD, CISA KEV, EPSS</p>
-        <p style={{ fontSize: '0.85rem', marginTop: '10px' }}>
-          <a 
-            href="https://mermaid.live" 
-            target="_blank" 
-            rel="noopener noreferrer"
-            style={{ color: '#00d4ff' }}
-          >
-            Open in mermaid.live
-          </a>
-        </p>
+        <p style={{ fontSize: '0.9rem' }}>Data sources: NVD, CISA KEV, EPSS</p>
       </footer>
     </div>
   )
@@ -428,21 +441,21 @@ function CisaKevList() {
             key={idx}
             style={{
               background: 'rgba(255,255,255,0.05)',
-              padding: '20px',
+              padding: '18px',
               borderRadius: '12px',
               borderLeft: '4px solid #ffa502'
             }}
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <h3 style={{ color: '#ffa502' }}>{vuln.cve_id}</h3>
-              <span style={{ color: '#666', fontSize: '0.9rem' }}>
+              <span style={{ color: '#666', fontSize: '0.85rem' }}>
                 Added: {vuln.date_added}
               </span>
             </div>
-            <p style={{ color: '#aaa', marginTop: '10px' }}>
+            <p style={{ color: '#aaa', marginTop: '10px', fontSize: '0.95rem' }}>
               {vuln.vendor} → {vuln.product}
             </p>
-            <p style={{ color: '#666', marginTop: '8px', fontSize: '0.9rem' }}>
+            <p style={{ color: '#666', marginTop: '8px', fontSize: '0.85rem' }}>
               {vuln.short_description}
             </p>
           </div>
