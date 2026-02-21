@@ -298,84 +298,222 @@ function App() {
                 </div>
               </div>
 
-              {/* Right Column - Kill Chain & Visualization */}
-              <div>
+              {/* Right Column - Kill Chain & Details */}
+              <div style={{ maxHeight: '80vh', overflowY: 'auto' }}>
                 {attackData ? (
                   <div style={{ 
                     background: 'rgba(255,255,255,0.05)', 
-                    padding: '25px', 
-                    borderRadius: '16px',
-                    position: 'sticky',
-                    top: '20px'
+                    padding: '20px', 
+                    borderRadius: '16px'
                   }}>
-                    <h2 style={{ color: '#00d4ff', marginBottom: '10px', fontSize: '1.3rem' }}>
-                      🎯 Kill Chain: {attackData.cve_id}
-                    </h2>
-                    <p style={{ color: '#888', marginBottom: '20px', fontSize: '0.9rem', lineHeight: '1.5' }}>
-                      {attackData.description?.substring(0, 300)}
+                    {/* CVSS Score */}
+                    {attackData.cvss && (
+                      <div style={{ marginBottom: '15px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <h2 style={{ color: '#00d4ff', margin: 0, fontSize: '1.2rem' }}>
+                          {attackData.cve_id}
+                        </h2>
+                        <span style={{
+                          padding: '4px 12px',
+                          borderRadius: '15px',
+                          background: attackData.cvss.score >= 9 ? '#ff4757' : attackData.cvss.score >= 7 ? '#ffa502' : '#2ed573',
+                          fontSize: '0.85rem',
+                          fontWeight: 'bold'
+                        }}>
+                          CVSS {attackData.cvss.score} {attackData.cvss.severity}
+                        </span>
+                      </div>
+                    )}
+
+                    {/* Description */}
+                    <p style={{ color: '#aaa', marginBottom: '15px', fontSize: '0.85rem', lineHeight: '1.5' }}>
+                      {attackData.description}
                     </p>
 
-                    {/* Techniques */}
-                    {attackData.kill_chain?.length > 0 && (
-                      <div style={{ marginBottom: '20px' }}>
-                        <h3 style={{ marginBottom: '12px', color: '#7c3aed', fontSize: '1rem' }}>ATT&CK Tactics & Techniques</h3>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                          {attackData.kill_chain.map((item, idx) => (
-                            <div
-                              key={idx}
-                              style={{
-                                background: 'linear-gradient(135deg, #7c3aed22, #00d4ff22)',
-                                padding: '10px 14px',
+                    {/* Patches */}
+                    {attackData.patches?.length > 0 && (
+                      <div style={{ marginBottom: '15px' }}>
+                        <h3 style={{ marginBottom: '8px', color: '#2ed573', fontSize: '0.95rem' }}>🔧 Patches Available</h3>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                          {attackData.patches.map((patch, idx) => (
+                            <a 
+                              key={idx} 
+                              href={patch.url} 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              style={{ 
+                                color: '#2ed573', 
+                                fontSize: '0.8rem', 
+                                textDecoration: 'none',
+                                background: 'rgba(46,213,115,0.1)',
+                                padding: '6px 10px',
                                 borderRadius: '6px',
-                                border: '1px solid #7c3aed',
-                                fontSize: '0.85rem'
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                                whiteSpace: 'nowrap'
                               }}
                             >
-                              <span style={{ color: '#00d4ff', fontWeight: 'bold' }}>
-                                Phase {item.phase}
-                              </span>
-                              <span style={{ margin: '0 8px', color: '#666' }}>→</span>
-                              <span style={{ color: '#fff' }}>{item.tactic_name}</span>
-                              <span style={{ margin: '0 8px', color: '#666' }}>→</span>
-                              <span style={{ color: '#7c3aed', fontFamily: 'monospace' }}>{item.technique_id}</span>
-                            </div>
+                              {patch.url}
+                            </a>
                           ))}
                         </div>
                       </div>
                     )}
 
-                    {/* Mermaid Visualization */}
-                    <div style={{ marginTop: '20px' }}>
-                      <h3 style={{ marginBottom: '12px', color: '#7c3aed', fontSize: '1rem' }}>📊 Kill Chain Visualization</h3>
-                      <div 
-                        ref={mermaidRef}
-                        style={{ 
-                          background: 'rgba(0,0,0,0.3)', 
-                          padding: '15px', 
-                          borderRadius: '10px',
-                          minHeight: '250px',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center'
-                        }}
-                      />
+                    {/* Mitigations */}
+                    {attackData.mitigations?.length > 0 && (
+                      <div style={{ marginBottom: '15px' }}>
+                        <h3 style={{ marginBottom: '8px', color: '#ffa502', fontSize: '0.95rem' }}>🛡️ Mitigations</h3>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                          {attackData.mitigations.map((m, idx) => (
+                            <a 
+                              key={idx} 
+                              href={m.url} 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              style={{ 
+                                color: '#ffa502', 
+                                fontSize: '0.8rem', 
+                                textDecoration: 'none',
+                                background: 'rgba(255,165,2,0.1)',
+                                padding: '6px 10px',
+                                borderRadius: '6px',
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                                whiteSpace: 'nowrap'
+                              }}
+                            >
+                              {m.url}
+                            </a>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Detection */}
+                    {attackData.detection?.length > 0 && (
+                      <div style={{ marginBottom: '15px' }}>
+                        <h3 style={{ marginBottom: '8px', color: '#00d4ff', fontSize: '0.95rem' }}>🔍 Detection Methods</h3>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                          {attackData.detection.map((d, idx) => (
+                            <a 
+                              key={idx} 
+                              href={d.url} 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              style={{ 
+                                color: '#00d4ff', 
+                                fontSize: '0.8rem', 
+                                textDecoration: 'none',
+                                background: 'rgba(0,212,255,0.1)',
+                                padding: '6px 10px',
+                                borderRadius: '6px',
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                                whiteSpace: 'nowrap'
+                              }}
+                            >
+                              {d.url}
+                            </a>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Recovery */}
+                    {attackData.recovery?.length > 0 && (
+                      <div style={{ marginBottom: '15px' }}>
+                        <h3 style={{ marginBottom: '8px', color: '#ff4757', fontSize: '0.95rem' }}>♻️ Recovery Steps</h3>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                          {attackData.recovery.map((r, idx) => (
+                            <a 
+                              key={idx} 
+                              href={r.url} 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              style={{ 
+                                color: '#ff4757', 
+                                fontSize: '0.8rem', 
+                                textDecoration: 'none',
+                                background: 'rgba(255,71,87,0.1)',
+                                padding: '6px 10px',
+                                borderRadius: '6px',
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                                whiteSpace: 'nowrap'
+                              }}
+                            >
+                              {r.url}
+                            </a>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Kill Chain Header */}
+                    <div style={{ borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '15px', marginTop: '10px' }}>
+                      <h3 style={{ marginBottom: '10px', color: '#7c3aed', fontSize: '0.95rem' }}>🎯 Kill Chain</h3>
                       
-                      {/* Mermaid Code */}
-                      <details style={{ marginTop: '15px' }}>
-                        <summary style={{ cursor: 'pointer', color: '#666', fontSize: '0.85rem' }}>
-                          View Mermaid Code
-                        </summary>
-                        <pre style={{ 
-                          background: 'rgba(0,0,0,0.5)', 
-                          padding: '12px', 
-                          borderRadius: '8px',
-                          overflow: 'auto',
-                          marginTop: '8px',
-                          fontSize: '0.75rem'
-                        }}>
-                          {attackData.mermaid}
-                        </pre>
-                      </details>
+                      {/* Techniques */}
+                      {attackData.kill_chain?.length > 0 && (
+                        <div style={{ marginBottom: '15px' }}>
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                            {attackData.kill_chain.map((item, idx) => (
+                              <div
+                                key={idx}
+                                style={{
+                                  background: 'linear-gradient(135deg, #7c3aed22, #00d4ff22)',
+                                  padding: '8px 12px',
+                                  borderRadius: '6px',
+                                  border: '1px solid #7c3aed',
+                                  fontSize: '0.8rem'
+                                }}
+                              >
+                                <span style={{ color: '#00d4ff', fontWeight: 'bold' }}>
+                                  Phase {item.phase}
+                                </span>
+                                <span style={{ margin: '0 6px', color: '#666' }}>→</span>
+                                <span style={{ color: '#fff' }}>{item.tactic_name}</span>
+                                <span style={{ margin: '0 6px', color: '#666' }}>→</span>
+                                <span style={{ color: '#7c3aed', fontFamily: 'monospace' }}>{item.technique_id}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Mermaid Visualization */}
+                      <div>
+                        <h4 style={{ marginBottom: '10px', color: '#7c3aed', fontSize: '0.9rem' }}>📊 Visualization</h4>
+                        <div 
+                          ref={mermaidRef}
+                          style={{ 
+                            background: 'rgba(0,0,0,0.3)', 
+                            padding: '12px', 
+                            borderRadius: '8px',
+                            minHeight: '180px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                          }}
+                        />
+                        
+                        {/* Mermaid Code */}
+                        <details style={{ marginTop: '12px' }}>
+                          <summary style={{ cursor: 'pointer', color: '#666', fontSize: '0.8rem' }}>
+                            View Mermaid Code
+                          </summary>
+                          <pre style={{ 
+                            background: 'rgba(0,0,0,0.5)', 
+                            padding: '10px', 
+                            borderRadius: '6px',
+                            overflow: 'auto',
+                            marginTop: '6px',
+                            fontSize: '0.7rem'
+                          }}>
+                            {attackData.mermaid}
+                          </pre>
+                        </details>
+                      </div>
                     </div>
                   </div>
                 ) : (
@@ -387,7 +525,7 @@ function App() {
                     color: '#666'
                   }}>
                     <p style={{ fontSize: '1.1rem', marginBottom: '10px' }}>👈 Select a CVE</p>
-                    <p style={{ fontSize: '0.9rem' }}>Click on a vulnerability to see its kill chain and visualization</p>
+                    <p style={{ fontSize: '0.9rem' }}>Click on a vulnerability to see details</p>
                   </div>
                 )}
               </div>
