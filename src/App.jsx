@@ -1,14 +1,35 @@
 import React, { useState, useEffect, useRef } from 'react'
 import mermaid from 'mermaid'
 
-// Initialize mermaid
+// Initialize mermaid - minimal config with no securityLevel restrictions
 mermaid.initialize({
   startOnLoad: false,
-  theme: 'dark',
-  securityLevel: 'loose',
 })
 
+// Removed securityLevel to allow custom classDef styling to render properly
+
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+
+// MITRE ATT&CK tactic color palette (matches backend Mermaid colors)
+const TACTIC_COLORS = {
+  'TA0001': { bg: '#00d4ff', border: '#00a8cc', name: 'Initial Access' },
+  'TA0002': { bg: '#0ea5e9', border: '#0284c7', name: 'Execution' },
+  'TA0003': { bg: '#8b5cf6', border: '#7c3aed', name: 'Persistence' },
+  'TA0004': { bg: '#a855f7', border: '#9333ea', name: 'Privilege Escalation' },
+  'TA0005': { bg: '#d946ef', border: '#c026d3', name: 'Defense Evasion' },
+  'TA0006': { bg: '#f97316', border: '#ea580c', name: 'Credential Access' },
+  'TA0007': { bg: '#fbbf24', border: '#f59e0b', name: 'Discovery' },
+  'TA0008': { bg: '#facc15', border: '#eab308', name: 'Lateral Movement' },
+  'TA0009': { bg: '#84cc16', border: '#65a30d', name: 'Collection' },
+  'TA0010': { bg: '#22c55e', border: '#16a34a', name: 'Command and Control' },
+  'TA0011': { bg: '#ef4444', border: '#dc2626', name: 'Exfiltration' },
+  'TA0040': { bg: '#dc2626', border: '#b91c1c', name: 'Impact' },
+}
+
+// Helper function to get colors for a specific tactic
+const getTacticColors = (tacticId) => {
+  return TACTIC_COLORS[tacticId] || { bg: '#666', border: '#444', name: 'Unknown' }
+}
 
 function App() {
   const [searchTerm, setSearchTerm] = useState('')
@@ -337,26 +358,30 @@ function App() {
                       {attackData.kill_chain?.length > 0 && (
                         <div style={{ marginBottom: '15px' }}>
                           <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                            {attackData.kill_chain.map((item, idx) => (
-                              <div
-                                key={idx}
-                                style={{
-                                  background: 'linear-gradient(135deg, #7c3aed22, #00d4ff22)',
-                                  padding: '8px 12px',
-                                  borderRadius: '6px',
-                                  border: '1px solid #7c3aed',
-                                  fontSize: '0.8rem'
-                                }}
-                              >
-                                <span style={{ color: '#00d4ff', fontWeight: 'bold' }}>
-                                  Phase {item.phase}
-                                </span>
-                                <span style={{ margin: '0 6px', color: '#666' }}>→</span>
-                                <span style={{ color: '#fff' }}>{item.tactic_name}</span>
-                                <span style={{ margin: '0 6px', color: '#666' }}>→</span>
-                                <span style={{ color: '#7c3aed', fontFamily: 'monospace' }}>{item.technique_id}</span>
-                              </div>
-                            ))}
+                            {attackData.kill_chain.map((item, idx) => {
+                              const colors = getTacticColors(item.tactic_id)
+
+                              return (
+                                <div
+                                  key={idx}
+                                  style={{
+                                    background: `${colors.bg}22`,
+                                    padding: '8px 12px',
+                                    borderRadius: '6px',
+                                    border: `2px solid ${colors.border}`,
+                                    fontSize: '0.8rem'
+                                  }}
+                                >
+                                  <span style={{ color: colors.bg, fontWeight: 'bold' }}>
+                                    Phase {item.phase}
+                                  </span>
+                                  <span style={{ margin: '0 6px', color: '#666' }}>→</span>
+                                  <span style={{ color: '#fff' }}>{item.tactic_name}</span>
+                                  <span style={{ margin: '0 6px', color: '#666' }}>→</span>
+                                  <span style={{ color: colors.bg, fontFamily: 'monospace' }}>{item.technique_id}</span>
+                                </div>
+                              )
+                            })}
                           </div>
                         </div>
                       )}
@@ -364,11 +389,11 @@ function App() {
                       {/* Mermaid Visualization */}
                       <div>
                         <h4 style={{ marginBottom: '10px', color: '#7c3aed', fontSize: '0.9rem' }}>📊 Visualization</h4>
-                        <div 
+                        <div
                           ref={mermaidRef}
-                          style={{ 
-                            background: 'rgba(0,0,0,0.3)', 
-                            padding: '12px', 
+                          style={{
+                            background: 'rgba(255,255,255,0.95)',
+                            padding: '12px',
                             borderRadius: '8px',
                             minHeight: '180px',
                             display: 'flex',
