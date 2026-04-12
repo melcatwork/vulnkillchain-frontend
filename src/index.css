@@ -84,7 +84,9 @@ a:hover {
 
 /* Mermaid diagram arrow styling for better contrast */
 .mermaid marker path,
-.mermaid marker polygon {
+.mermaid marker polygon,
+.mermaid defs marker path,
+.mermaid defs marker polygon {
   fill: #ffffff !important;
   stroke: #ffffff !important;
 }
@@ -92,4 +94,16 @@ a:hover {
 .mermaid .edgePath path {
   stroke: #ffffff !important;
   stroke-width: 2px !important;
+}
+
+/* Target all marker elements more aggressively */
+svg.mermaid marker#flowchart-pointEnd path,
+svg.mermaid marker#flowchart-pointEnd polygon,
+svg.mermaid marker[id*="arrowhead"] path,
+svg.mermaid marker[id*="arrowhead"] polygon,
+svg.mermaid marker[id*="point"] path,
+svg.mermaid marker[id*="point"] polygon {
+  fill: #ffffff !important;
+  stroke: #ffffff !important;
+  color: #ffffff !important;
 }
