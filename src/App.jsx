@@ -1,13 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react'
 import mermaid from 'mermaid'
 
-// Initialize mermaid - no theme property to let Mermaid use its own default behavior
+// Initialize mermaid - minimal config with no securityLevel restrictions
 mermaid.initialize({
   startOnLoad: false,
-  securityLevel: 'loose',
 })
 
-// Theme property removed - this should allow custom classDef colors to work
+// Removed securityLevel to allow custom classDef styling to render properly
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000'
 
