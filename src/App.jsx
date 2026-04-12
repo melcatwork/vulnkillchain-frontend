@@ -1,11 +1,20 @@
 import React, { useState, useEffect, useRef } from 'react'
 import mermaid from 'mermaid'
 
-// Initialize mermaid
+// Initialize mermaid - use 'base' theme to respect custom classDef colors
 mermaid.initialize({
   startOnLoad: false,
-  theme: 'dark',
+  theme: 'base',
   securityLevel: 'loose',
+  themeVariables: {
+    darkMode: true,
+    background: 'transparent',
+    primaryTextColor: '#ffffff',
+    primaryBorderColor: '#444',
+    lineColor: '#666',
+    secondaryColor: '#2a2a2a',
+    tertiaryColor: '#3a3a3a',
+  }
 })
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000'
