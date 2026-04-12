@@ -1,15 +1,15 @@
 import React, { useState, useEffect, useRef } from 'react'
 import mermaid from 'mermaid'
 
-// Initialize mermaid - use 'base' theme to respect custom classDef colors
+// Initialize mermaid - use 'neutral' theme to respect custom classDef colors
 mermaid.initialize({
   startOnLoad: false,
-  theme: 'base',
+  theme: 'neutral',
   securityLevel: 'loose',
 })
 
-// Alternative configurations if 'base' doesn't show colors:
-// Option 2: theme: 'neutral'
+// Alternative configurations if 'neutral' doesn't show colors:
+// Option 1: theme: 'base'
 // Option 3: theme: 'default'
 // Option 4: Remove theme property entirely
 
