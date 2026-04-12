@@ -81,3 +81,15 @@ a {
 a:hover {
   text-decoration: underline;
 }
+
+/* Mermaid diagram arrow styling for better contrast */
+.mermaid marker path,
+.mermaid marker polygon {
+  fill: #ffffff !important;
+  stroke: #ffffff !important;
+}
+
+.mermaid .edgePath path {
+  stroke: #ffffff !important;
+  stroke-width: 2px !important;
+}
