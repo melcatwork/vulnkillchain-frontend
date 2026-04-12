@@ -1,17 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react'
 import mermaid from 'mermaid'
 
-// Initialize mermaid - use 'default' theme to respect custom classDef colors
+// Initialize mermaid - no theme property to let Mermaid use its own default behavior
 mermaid.initialize({
   startOnLoad: false,
-  theme: 'default',
   securityLevel: 'loose',
 })
 
-// Alternative configurations if 'default' doesn't show colors:
-// Option 1: theme: 'base'
-// Option 2: theme: 'neutral'
-// Option 4: Remove theme property entirely
+// Theme property removed - this should allow custom classDef colors to work
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000'
 
