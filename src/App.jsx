@@ -6,16 +6,12 @@ mermaid.initialize({
   startOnLoad: false,
   theme: 'base',
   securityLevel: 'loose',
-  themeVariables: {
-    darkMode: true,
-    background: 'transparent',
-    primaryTextColor: '#ffffff',
-    primaryBorderColor: '#444',
-    lineColor: '#666',
-    secondaryColor: '#2a2a2a',
-    tertiaryColor: '#3a3a3a',
-  }
 })
+
+// Alternative configurations if 'base' doesn't show colors:
+// Option 2: theme: 'neutral'
+// Option 3: theme: 'default'
+// Option 4: Remove theme property entirely
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000'
 
