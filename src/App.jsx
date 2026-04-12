@@ -389,11 +389,11 @@ function App() {
                       {/* Mermaid Visualization */}
                       <div>
                         <h4 style={{ marginBottom: '10px', color: '#7c3aed', fontSize: '0.9rem' }}>📊 Visualization</h4>
-                        <div 
+                        <div
                           ref={mermaidRef}
-                          style={{ 
-                            background: 'rgba(0,0,0,0.3)', 
-                            padding: '12px', 
+                          style={{
+                            background: 'rgba(255,255,255,0.95)',
+                            padding: '12px',
                             borderRadius: '8px',
                             minHeight: '180px',
                             display: 'flex',
