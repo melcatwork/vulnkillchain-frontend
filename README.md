@@ -1,4 +1,4 @@
-# VulnKillChain Frontend
+# CVE Search Frontend
 
 React frontend for CVE search and MITRE ATT&CK kill chain visualization.
 

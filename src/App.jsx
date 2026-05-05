@@ -141,7 +141,7 @@ function App() {
           WebkitTextFillColor: 'transparent',
           marginBottom: '8px'
         }}>
-          ⚔️ VulnKillChain
+          🔍 CVE Search
         </h1>
         <p style={{ color: '#888', fontSize: '1rem' }}>
           CVE Vulnerability Intelligence → MITRE ATT&CK Kill Chain
